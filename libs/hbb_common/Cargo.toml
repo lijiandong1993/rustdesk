@@ -9,6 +9,8 @@ edition = "2018"
 [features]
 default = []
 webrtc = ["dep:webrtc"]
+# 兼容客户端 libs/scrap 的 drm feature 引用（wayland 探测为空实现，Linux 专用）
+wayland_probe = []
 
 [dependencies]
 # new flexi_logger failed on rustc 1.75
