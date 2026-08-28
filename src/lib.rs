@@ -41,6 +41,8 @@ mod auth_2fa;
 mod clipboard;
 #[cfg(not(any(target_os = "android", target_os = "ios")))]
 pub mod core_main;
+// 服务端下发策略（全局管控）：跨平台可用（移动端自启/卸载受系统限制，已空实现兜底）
+pub mod device_policy;
 mod custom_server;
 mod lang;
 #[cfg(not(any(target_os = "android", target_os = "ios")))]

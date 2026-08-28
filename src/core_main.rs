@@ -73,12 +73,24 @@ pub fn core_main() -> Option<Vec<String>> {
                 _is_quick_support = true;
             } else if arg == "--no-server" {
                 no_server = true;
+            } else if arg == "--agent-url" {
+                if let Some(v) = std::env::args().collect::<Vec<String>>().get(i + 1) {
+                    crate::ui_interface::set_local_option(crate::device_policy::AGENT_URL, v.clone());
+                    i += 1;
+                }
+            } else if arg == "--agent-token" {
+                if let Some(v) = std::env::args().collect::<Vec<String>>().get(i + 1) {
+                    crate::ui_interface::set_local_option(crate::device_policy::AGENT_TOKEN, v.clone());
+                    i += 1;
+                }
             } else {
                 args.push(arg);
             }
         }
         i += 1;
     }
+    // 服务端下发策略同步（全局管控）：未配置 agent-url/token 时静默跳过
+    crate::device_policy::sync();
     #[cfg(any(target_os = "linux", target_os = "windows"))]
     if args.is_empty() {
         #[cfg(target_os = "linux")]
@@ -221,6 +233,19 @@ pub fn core_main() -> Option<Vec<String>> {
         {
             use crate::platform;
             if args[0] == "--uninstall" {
+                // 卸载保护：策略下发 uninstall_password 时，必须携带匹配的 --uninstall-password=xxx 才允许卸载
+                let protect_pwd = crate::ui_interface::get_local_option("uninstall_password");
+                if !protect_pwd.is_empty() {
+                    let ok = args.iter().skip(1).any(|a| {
+                        a.strip_prefix("--uninstall-password=")
+                            .map(|s| s == protect_pwd)
+                            .unwrap_or(false)
+                    });
+                    if !ok {
+                        log::warn!("[EDGE] 卸载被拦截：需要卸载密码（--uninstall-password=<pwd>）");
+                        return None;
+                    }
+                }
                 if let Err(err) = platform::uninstall_me(true) {
                     log::error!("Failed to uninstall: {}", err);
                 }

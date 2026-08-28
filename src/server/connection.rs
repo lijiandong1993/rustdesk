@@ -477,7 +477,11 @@ impl Connection {
             audio: Self::permission(keys::OPTION_ENABLE_AUDIO, &control_permissions),
             // to-do: make sure is the option correct here
             file: Self::permission(keys::OPTION_ENABLE_FILE_TRANSFER, &control_permissions),
-            restart: Self::permission(keys::OPTION_ENABLE_REMOTE_RESTART, &control_permissions),
+            // 关机/重启保护：服务端策略 remote_shutdown_protect=Y 时强制禁止控制端远程重启
+            restart: {
+                let protect = crate::ui_interface::get_local_option("remote_shutdown_protect") == "Y";
+                !protect && Self::permission(keys::OPTION_ENABLE_REMOTE_RESTART, &control_permissions)
+            },
             recording: Self::permission(keys::OPTION_ENABLE_RECORD_SESSION, &control_permissions),
             block_input: Self::permission(keys::OPTION_ENABLE_BLOCK_INPUT, &control_permissions),
             privacy_mode: Self::permission(keys::OPTION_ENABLE_PRIVACY_MODE, &control_permissions),
