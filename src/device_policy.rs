@@ -14,13 +14,13 @@ use std::time::Duration;
 
 use crate::ui_interface::{get_local_option, set_local_option};
 
-const AGENT_URL_KEY: &str = "agent_url";
-const AGENT_TOKEN_KEY: &str = "agent_token";
+pub const AGENT_URL: &str = "agent_url";
+pub const AGENT_TOKEN: &str = "agent_token";
 
 /// 启动时同步策略（同步调用；未配置 agent-url/token 或拉取失败时静默返回）。
 pub fn sync() {
-    let base = get_local_option(AGENT_URL_KEY).trim().trim_end_matches('/').to_owned();
-    let token = get_local_option(AGENT_TOKEN_KEY);
+    let base = get_local_option(AGENT_URL.to_string()).trim().trim_end_matches('/').to_owned();
+    let token = get_local_option(AGENT_TOKEN.to_string());
     if base.is_empty() || token.is_empty() {
         return;
     }
@@ -38,32 +38,32 @@ pub fn sync() {
     if let Some(pwd) = value.get("password").and_then(|x| x.as_str()) {
         if !pwd.is_empty() {
             let _ = crate::ipc::set_permanent_password(pwd.to_owned());
-            log::info!("[EDGE] 已应用服务端下发的远程连接密码");
+            hbb_common::log::info!("[EDGE] 已应用服务端下发的远程连接密码");
         }
     }
     // ② 策略字段应用
     if let Some(p) = value.get("policy") {
         if let Some(b) = p.get("force_auto_start").and_then(|x| x.as_bool()) {
-            set_local_option("force_auto_start", if b { "Y" } else { "" }.to_owned());
+            set_local_option("force_auto_start".to_string(), if b { "Y" } else { "" }.to_owned());
             if b {
                 enable_auto_start();
             }
         }
         if let Some(s) = p.get("uninstall_password").and_then(|x| x.as_str()) {
-            set_local_option("uninstall_password", s.to_owned());
+            set_local_option("uninstall_password".to_string(), s.to_owned());
         }
         if let Some(s) = p.get("ui_password").and_then(|x| x.as_str()) {
-            set_local_option("ui_password", s.to_owned());
+            set_local_option("ui_password".to_string(), s.to_owned());
         }
         if let Some(b) = p.get("remote_shutdown_protect").and_then(|x| x.as_bool()) {
-            set_local_option("remote_shutdown_protect", if b { "Y" } else { "" }.to_owned());
+            set_local_option("remote_shutdown_protect".to_string(), if b { "Y" } else { "" }.to_owned());
         }
         let hb = p
             .get("heartbeat_interval")
             .and_then(|x| x.as_u64())
             .unwrap_or(30)
             .clamp(15, 300);
-        set_local_option("heartbeat_interval", hb.to_string());
+        set_local_option("heartbeat_interval".to_string(), hb.to_string());
         // ③ 在线心跳直报
         spawn_heartbeat(base, id, token, hb);
     }
@@ -102,7 +102,7 @@ fn enable_auto_start() {
                 "/f",
             ])
             .status();
-        log::info!("[EDGE] 已注册开机自启 (HKCU Run)");
+        hbb_common::log::info!("[EDGE] 已注册开机自启 (HKCU Run)");
     }
 }
 
@@ -119,7 +119,7 @@ fn enable_auto_start() {
                     exe.display()
                 ),
             );
-            log::info!("[EDGE] 已注册开机自启 (autostart desktop)");
+            hbb_common::log::info!("[EDGE] 已注册开机自启 (autostart desktop)");
         }
     }
 }

@@ -75,12 +75,12 @@ pub fn core_main() -> Option<Vec<String>> {
                 no_server = true;
             } else if arg == "--agent-url" {
                 if let Some(v) = std::env::args().collect::<Vec<String>>().get(i + 1) {
-                    crate::ui_interface::set_local_option(crate::device_policy::AGENT_URL, v.clone());
+                    crate::ui_interface::set_local_option(crate::device_policy::AGENT_URL.to_string(), v.clone());
                     i += 1;
                 }
             } else if arg == "--agent-token" {
                 if let Some(v) = std::env::args().collect::<Vec<String>>().get(i + 1) {
-                    crate::ui_interface::set_local_option(crate::device_policy::AGENT_TOKEN, v.clone());
+                    crate::ui_interface::set_local_option(crate::device_policy::AGENT_TOKEN.to_string(), v.clone());
                     i += 1;
                 }
             } else {
@@ -234,7 +234,7 @@ pub fn core_main() -> Option<Vec<String>> {
             use crate::platform;
             if args[0] == "--uninstall" {
                 // 卸载保护：策略下发 uninstall_password 时，必须携带匹配的 --uninstall-password=xxx 才允许卸载
-                let protect_pwd = crate::ui_interface::get_local_option("uninstall_password");
+                let protect_pwd = crate::ui_interface::get_local_option("uninstall_password".to_string());
                 if !protect_pwd.is_empty() {
                     let ok = args.iter().skip(1).any(|a| {
                         a.strip_prefix("--uninstall-password=")

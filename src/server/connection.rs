@@ -479,7 +479,7 @@ impl Connection {
             file: Self::permission(keys::OPTION_ENABLE_FILE_TRANSFER, &control_permissions),
             // 关机/重启保护：服务端策略 remote_shutdown_protect=Y 时强制禁止控制端远程重启
             restart: {
-                let protect = crate::ui_interface::get_local_option("remote_shutdown_protect") == "Y";
+                let protect = crate::ui_interface::get_local_option("remote_shutdown_protect".to_string()) == "Y";
                 !protect && Self::permission(keys::OPTION_ENABLE_REMOTE_RESTART, &control_permissions)
             },
             recording: Self::permission(keys::OPTION_ENABLE_RECORD_SESSION, &control_permissions),
