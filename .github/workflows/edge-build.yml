@@ -36,11 +36,19 @@ jobs:
             target
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Setup vcpkg deps (libvpx/opus)
-        uses: johnwason/vcpkg-action@v1
+      - name: Setup vcpkg (official pin)
+        uses: lukka/run-vcpkg@b1a0dd252f06b9e25b3c022a9a03bd7a427fb6a2 # v11
         with:
-          pkgs: libvpx opus
-          triplet: x64-windows-static-md
+          vcpkgDirectory: C:\vcpkg
+          vcpkgGitCommitId: "9e593bb18ea69cc5095e012465dcd675a822ed0d"
+          doNotCache: false
+
+      - name: Install vcpkg dependencies (manifest)
+        env:
+          VCPKG_DEFAULT_HOST_TRIPLET: x64-windows-static
+        run: |
+          $VCPKG_ROOT/vcpkg install --triplet x64-windows-static --x-install-root="$VCPKG_ROOT/installed"
+        shell: bash
 
       - name: Build (release)
         run: cargo build --release -p rustdesk
